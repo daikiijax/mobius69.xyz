@@ -92,5 +92,5 @@ HyperEVM has a deployed contract but the tool does not support it yet. Core has 
 - Website: https://mobius69.xyz
 - Docs: https://mobius69.xyz/docs
 - Partner program: https://mobius69.xyz/partner
-- Telegram: https://t.me/mobius699
+- Telegram: https://t.me/mobius69xyz
 - X: https://x.com/mobius69xyz
