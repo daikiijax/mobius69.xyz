@@ -34,6 +34,90 @@ On Solana, you simulate first. You see exactly what will be swept before anythin
 3. **Simulate.** The tool shows you exactly what will be swept, batch by batch, before anything moves.
 4. **Execute.** SOL, tokens, and NFTs move to your safe wallet. Core NFTs have their own dedicated sweep.
 
+## How it works
+
+This is what happens inside one EVM rescue transaction.
+
+### The transaction
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant D as Dashboard
+    participant R as MOBIUS69 router
+    participant A as Compromised account
+    participant C as Contracts
+    participant V as Safe Receiver
+    U->>D: Enter compromised key, mode, Safe Receiver
+    D->>D: Build M69 payload
+    Note over D: The compromised key signs locally. Only the signed transaction leaves the browser.
+    D->>D: Sign authorization and intent with the compromised key
+    D->>R: Send type-4 transaction, paid by the sponsor
+    R->>A: Check delegation: 23 bytes, 0xef0100 plus router address
+    R->>R: Check signature, nonce, deadline
+    R->>A: Call M69 payload in account context
+    opt Target call (modes 1, 3, 4, 6)
+        A->>C: Call target with data and native value
+    end
+    opt NFT transfers (modes 4, 5)
+        A->>C: Call NFT transfer to Safe Receiver
+    end
+    opt Token split (modes 1, 2, 3)
+        A->>C: Call token transfer, split 80 / 10 / 10
+    end
+    A->>V: Send native remainder, split 80 / 10 / 10
+    Note over R: Leftover balance is refunded to the sponsor.
+    Note over A: Delegation stays until mode 7 revokes it.
+```
+
+### Pick a mode
+
+```mermaid
+flowchart TD
+    A[What do you want to do?] --> B[Claim from a contract]
+    A --> C[Move tokens]
+    A --> D[Run a custom call]
+    A --> E[Mint and transfer an NFT]
+    A --> F[Transfer NFTs]
+    A --> G[Mint only]
+    B --> M1[Mode 1: Claim and Transfer]
+    C --> M2[Mode 2: Batch Token Transfer]
+    D --> M3[Mode 3: Custom Contract Call]
+    E --> M4[Mode 4: Mint NFT and Transfer]
+    F --> M5[Mode 5: Batch NFT Transfer]
+    G --> M6[Mode 6: Mint NFT Only]
+```
+
+### Modes
+
+| Mode | What it does | Target | Tokens | NFTs | Fee |
+|---|---|---|---|---|---|
+| 1 Claim & Transfer | Claim from a contract, then sweep | Claim contract | Claimed tokens | No | Tokens and native |
+| 2 Batch Token Transfer | Sweep listed tokens | None | Listed tokens | No | Tokens and native |
+| 3 Custom Contract Call | Any contract call, plus optional sweep | Any contract | Optional | Via calldata, any standard | Tokens and native |
+| 4 Mint NFT & Transfer | Mint, then transfer one ERC721 | Mint contract | No | One ERC721 | Native leftover |
+| 5 Batch NFT Transfer | Transfer listed ERC721 NFTs | None | No | Listed ERC721 | Native leftover |
+| 6 Mint NFT Only | Mint from the account, no transfer | Mint contract | No | Minted, not transferred | Native leftover |
+
+In mode 3, listing tokens without a Safe Receiver is rejected by the dashboard. In mode 5, only ERC721 is built in. ERC1155 and other standards go through mode 3 with hand-written calldata.
+
+### What the contract checks
+
+- Delegation is exactly 23 bytes: 0xef0100 plus the router address.
+- Payload selector must be M69.
+- Intent signature must recover to the compromised account.
+- Nonce per account and sponsor increases before execution.
+- Deadline must not have passed.
+- No owner, no pause, no upgrade. The rules cannot change after deployment.
+
+### Fee
+
+Rescued tokens and native are split 80% to the Safe Receiver, 10% to the protocol, 10% to the referrer when one is set. Without a referrer, the protocol share is 20%. NFTs move in full. No fee is taken when the transaction reverts.
+
+### After the rescue
+
+Mode 7 is not a rescue. It removes the delegation: the account authorizes the zero address, the delegation is cleared, and the account becomes a normal wallet again. Run it after a successful rescue.
+
 ## Why you can trust it
 
 **Your keys never leave your device.** Everything runs in your browser. Your keys sign locally and are never sent to a server.
