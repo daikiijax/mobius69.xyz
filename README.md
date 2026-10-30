@@ -38,6 +38,8 @@ On Solana, you simulate first. You see exactly what will be swept before anythin
 
 This is what happens inside one EVM rescue transaction.
 
+In plain words: the compromised key signs in your browser and never leaves it. The sponsor pays gas. Assets move to your Safe Receiver in one transaction. The delegation stays until you remove it with mode 7.
+
 ### The transaction
 
 ```mermaid
@@ -63,9 +65,9 @@ sequenceDiagram
         A->>C: Call NFT transfer to Safe Receiver
     end
     opt Token split (modes 1, 2, 3)
-        A->>C: Call token transfer, split 80 / 10 / 10
+        A->>C: Call token transfer, split 80 / 20
     end
-    A->>V: Send native remainder, split 80 / 10 / 10
+    A->>V: Send native remainder, split 80 / 20
     Note over R: Leftover balance is refunded to the sponsor.
     Note over A: Delegation stays until mode 7 revokes it.
 ```
@@ -112,11 +114,15 @@ In mode 3, listing tokens without a Safe Receiver is rejected by the dashboard. 
 
 ### Fee
 
-Rescued tokens and native are split 80% to the Safe Receiver, 10% to the protocol, 10% to the referrer when one is set. Without a referrer, the protocol share is 20%. NFTs move in full. No fee is taken when the transaction reverts.
+Rescued tokens and native carry a 20% fee, taken only when the rescue succeeds. NFTs move in full. No fee is taken when the transaction reverts.
 
 ### After the rescue
 
 Mode 7 is not a rescue. It removes the delegation: the account authorizes the zero address, the delegation is cleared, and the account becomes a normal wallet again. Run it after a successful rescue.
+
+### Network
+
+For EVM rescues, the dashboard talks directly to public RPC endpoints. There is no MOBIUS backend in between. The current endpoint list lives in networks.js on the website: https://www.mobius69.xyz/networks.js. You can also set a custom RPC URL in the dashboard, including a private endpoint. The RPC endpoint sees your addresses and transactions, but never your key.
 
 ## Why you can trust it
 
