@@ -168,6 +168,7 @@ Every rescue contract is deployed on its chain. Check it yourself on the chain e
 | Mantle Mainnet | `0x1Ce67C484b245326f57BE4a79893db22af13bc5A` | [MantleScan](https://mantlescan.xyz/address/0x1Ce67C484b245326f57BE4a79893db22af13bc5A) |
 | Soneium Mainnet | `0x073ca6F063562EAc7B86d193F68C0DD81817A465` | [Blockscout](https://soneium.blockscout.com/address/0x073ca6F063562EAc7B86d193F68C0DD81817A465) |
 | Core Mainnet (Coming Soon) | Not deployed yet | [Core Scan](https://scan.coredao.org) |
+| Intuition Mainnet | `0xd41a059FA797Fe304301A08CbfEBe417d1903eAE` | [Blockscout](https://explorer.intuition.systems/address/0xd41a059FA797Fe304301A08CbfEBe417d1903eAE) |
 
 HyperEVM has a deployed contract but the tool does not support it yet. Core has no contract deployed yet, so its link goes to the explorer homepage.
 
