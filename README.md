@@ -20,6 +20,8 @@ On Solana, you simulate first. You see exactly what will be swept before anythin
 
 ## The flow
 
+The idea is the same on both chains: a sponsor pays the costs, and the assets move to a safe wallet.
+
 ### EVM rescue
 
 1. **Pick the chain.** Choose the network where the compromised wallet lives.
@@ -94,9 +96,9 @@ flowchart TD
 
 | Mode | What it does | Target | Tokens | NFTs | Fee |
 |---|---|---|---|---|---|
-| 1 Claim & Transfer | Claim from a contract, then sweep | Claim contract | Claimed tokens | No | Tokens and native |
-| 2 Batch Token Transfer | Sweep listed tokens | None | Listed tokens | No | Tokens and native |
-| 3 Custom Contract Call | Any contract call, plus optional sweep | Any contract | Optional | Via calldata, any standard | Tokens and native |
+| 1 Claim & Transfer | Claim from a contract, then sweep | Claim contract | Claimed tokens | No | Tokens or native |
+| 2 Batch Token Transfer | Sweep listed tokens | None | Listed tokens | No | Tokens or native |
+| 3 Custom Contract Call | Any contract call, plus optional sweep | Any contract | Optional | Via calldata, any standard | Tokens or native |
 | 4 Mint NFT & Transfer | Mint, then transfer one ERC721 | Mint contract | No | One ERC721 | Native leftover |
 | 5 Batch NFT Transfer | Transfer listed ERC721 NFTs | None | No | Listed ERC721 | Native leftover |
 | 6 Mint NFT Only | Mint from the account, no transfer | Mint contract | No | Minted, not transferred | Native leftover |
@@ -114,7 +116,7 @@ In mode 3, listing tokens without a Safe Receiver is rejected by the dashboard. 
 
 ### Fee
 
-Rescued tokens and native carry a 20% fee, taken only when the rescue succeeds. NFTs move in full. No fee is taken when the transaction reverts.
+Rescued tokens or native carry a 20% fee, taken only when the rescue succeeds. NFTs move in full. No fee is taken when the transaction reverts.
 
 ### After the rescue
 
